@@ -17,7 +17,7 @@ func main() {
 	http.HandleFunc("/logs", func(w http.ResponseWriter, r *http.Request) {
 		body, err := ioutil.ReadAll(r.Body)
 		if err == nil {
-			fmt.Println(body)
+			fmt.Println(string(body))
 		}
 		fmt.Fprintf(w, "ok")
 	})
