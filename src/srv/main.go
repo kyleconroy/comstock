@@ -36,6 +36,7 @@ func main() {
 			return
 		}
 
+		fmt.Printf("parsed %d messages\n", len(msgs))
 		fmt.Fprintf(w, "parsed %d messages\n", len(msgs))
 	})
 
