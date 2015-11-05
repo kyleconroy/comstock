@@ -6,6 +6,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+
+	"syslog"
 )
 
 func main() {
@@ -15,13 +18,25 @@ func main() {
 	}
 
 	http.HandleFunc("/logs", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println(r.Header.Get("Logplex-Msg-Count"))
-		fmt.Println(r.Header.Get("Logplex-Frame-Id"))
-		body, err := ioutil.ReadAll(r.Body)
-		if err == nil {
-			fmt.Println(string(body))
+		count, err := strconv.ParseInt(r.Header.Get("Logplex-Msg-Count"), 10, 32)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
 		}
-		fmt.Fprintf(w, "ok")
+
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		msgs, err := syslog.ParseFrame(body, int(count))
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		fmt.Fprintf(w, "parsed %d messages\n", len(msgs))
 	})
 
 	log.Fatal(http.ListenAndServe(":"+port, nil))
