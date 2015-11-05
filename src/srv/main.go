@@ -15,6 +15,8 @@ func main() {
 	}
 
 	http.HandleFunc("/logs", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println(r.Header.Get("Logplex-Msg-Count"))
+		fmt.Println(r.Header.Get("Logplex-Frame-Id"))
 		body, err := ioutil.ReadAll(r.Body)
 		if err == nil {
 			fmt.Println(string(body))
