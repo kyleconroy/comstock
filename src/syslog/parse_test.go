@@ -18,8 +18,9 @@ var demo = []byte(`83 <40>1 2012-11-30T06:45:29+00:00 host app web.3 - State cha
 `)
 
 func TestParseMessage(t *testing.T) {
-	_, err := ParseFrame(logs, 7)
+	messages, err := ParseFrame(logs, 7)
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Log(messages)
 }

@@ -3,6 +3,7 @@ package syslog
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -12,12 +13,27 @@ type Message struct {
 	Version     int
 	Hostname    string
 	Application string
-	Stamp       time.Time
+	Created     time.Time
 	Body        string
 }
 
 func ParseMessage(b []byte) (Message, error) {
-	return Message{Length: len(b)}, nil
+	msg := strings.SplitN(string(b), " ", 7)
+	if len(msg) != 7 {
+		return Message{}, fmt.Errorf("Expected message to have 7 parts, not %d", len(msg))
+	}
+	timestamp, app, process, body := msg[1], msg[3], msg[4], msg[6]
+	created, err := time.Parse("2006-01-02T15:04:05+00:00", timestamp)
+	if err != nil {
+		created = time.Time{}
+	}
+	return Message{
+		Length:      len(b),
+		Hostname:    app,
+		Application: process,
+		Body:        body,
+		Created:     created,
+	}, nil
 }
 
 func ParseFrame(b []byte, expected int) ([]Message, error) {
