@@ -19,12 +19,27 @@ func main() {
 	}
 
 	topic := os.Getenv("COMSTOCK_KAFKA_TOPIC")
+	username := os.Getenv("COMSTOCK_USERNAME")
+	password := os.Getenv("COMSTOCK_PASSWORD")
+	if username == "" {
+		log.Fatal("COMSTOCK_USERNAME environment variable must be set")
+	}
+	if password == "" {
+		log.Fatal("COMSTOCK_PASSWORD environment variable must be set")
+	}
+
 	producer, err := newProducer()
 	if err != nil {
 		log.Fatalf("Error creating Kafka producer: %s", err)
 	}
 
 	http.HandleFunc("/logs", func(w http.ResponseWriter, r *http.Request) {
+		user, pass, _ := r.BasicAuth()
+		if user != username && pass != password {
+			http.Error(w, "Unauthorized.", 401)
+			return
+		}
+
 		count, err := strconv.ParseInt(r.Header.Get("Logplex-Msg-Count"), 10, 32)
 		if err != nil {
 			http.Error(w, err.Error(), 500)
