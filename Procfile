@@ -1,1 +1,1 @@
-web: srv
+web: comstock
